@@ -13,9 +13,6 @@ Um sistema completo de gerenciamento de receitas desenvolvido com Node.js, TypeS
 - Autenticação de usuários (registro/login)
 - Gerenciamento de receitas (operações CRUD)
 - Gerenciamento de categorias
-- Impressão de receitas
-- Design responsivo
-- Interface moderna com TailwindCSS
 
 ## 📋 Pré-requisitos
 
@@ -28,8 +25,8 @@ Antes de começar, certifique-se de ter instalado:
 
 1. Clone o repositório:
 ```bash
-git clone <url-do-repositório>
-cd gerenciador-receitas
+git clone https://github.com/kevinsilvatec/a4pm-test
+cd a4pm-test
 ```
 
 2. Inicie a aplicação usando Docker Compose:
@@ -108,13 +105,13 @@ npm run dev
 ### Testes do Backend
 ```bash
 cd backend
-npm test
+npm run test
 ```
 
 ### Testes do Frontend
 ```bash
 cd frontend
-npm test
+npm run test
 ```
 
 ## 📚 Documentação da API
@@ -148,14 +145,14 @@ O frontend utiliza:
 - `npm run dev`: Inicia o servidor de desenvolvimento
 - `npm run build`: Compila para produção
 - `npm start`: Inicia o servidor de produção
-- `npm test`: Executa os testes
+- `npm run test`: Executa os testes
 - `npm run migrate`: Executa as migrações do banco de dados
 
 ### Frontend
 - `npm run dev`: Inicia o servidor de desenvolvimento
 - `npm run build`: Compila para produção
 - `npm run preview`: Visualiza a compilação de produção
-- `npm test`: Executa os testes
+- `npm run test`: Executa os testes
 
 ## 🔄 Migrações do Banco de Dados
 

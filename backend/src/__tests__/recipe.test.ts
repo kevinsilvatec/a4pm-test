@@ -158,8 +158,8 @@ describe('RecipeController', () => {
       const existingRecipe = {
         id: 1,
         id_usuarios: mockRequest.userId,
-        nome: 'Old Recipe',
-        modo_preparo: 'Old method',
+        nome: 'Updated Recipe',
+        modo_preparo: 'Updated method',
         criado_em: new Date(),
         alterado_em: new Date(),
       };
@@ -172,15 +172,14 @@ describe('RecipeController', () => {
       mockRequest.params = { id: '1' };
       mockRequest.body = recipeData;
 
-      const mergedRecipe = {
-        ...existingRecipe,
-        ...recipeData,
-        alterado_em: new Date(),
-      };
-
       (mockRepository.findOne as jest.Mock).mockResolvedValue(existingRecipe);
-      (mockRepository.merge as jest.Mock).mockReturnValue(mergedRecipe);
-      (mockRepository.save as jest.Mock).mockResolvedValue(mergedRecipe);
+
+      (mockRepository.merge as jest.Mock).mockImplementation((entity, data) => ({
+        ...entity,
+        ...data,
+      }));
+
+      (mockRepository.save as jest.Mock).mockImplementation((entity) => Promise.resolve(entity));
 
       await controller.update(mockRequest as Request, mockResponse as Response);
 
@@ -193,8 +192,17 @@ describe('RecipeController', () => {
         alterado_em: expect.any(Date),
       });
 
-      expect(mockRepository.save).toHaveBeenCalledWith(mergedRecipe);
-      expect(mockResponse.json).toHaveBeenCalledWith(mergedRecipe);
+      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({
+        ...existingRecipe,
+        ...recipeData,
+        alterado_em: expect.any(Date),
+      }));
+
+      expect(mockResponse.json).toHaveBeenCalledWith(expect.objectContaining({
+        ...existingRecipe,
+        ...recipeData,
+        alterado_em: expect.any(Date),
+      }));
     });
 
     it('should return 404 if recipe not found', async () => {

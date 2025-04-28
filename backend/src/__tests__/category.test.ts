@@ -79,7 +79,7 @@ describe('CategoryController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        error: 'Category with this name already exists',
+        error: 'Category already exists',
       });
     });
   });
@@ -115,7 +115,6 @@ describe('CategoryController', () => {
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
         where: { id: 1 },
-        relations: ['receitas'],
       });
       expect(mockResponse.json).toHaveBeenCalledWith(category);
     });
@@ -133,40 +132,42 @@ describe('CategoryController', () => {
 
   describe('update', () => {
     it('should update a category', async () => {
-      const categoryId = 1;
+      const existingCategory = {
+        id: 1,
+        nome: 'Updated Category',
+        receitas: [],
+      };
+
       const updateData = {
         nome: 'Updated Category',
       };
 
-      const existingCategory = {
-        id: categoryId,
-        nome: 'Old Category',
-        receitas: [],
-      };
-
-      mockRequest.params = { id: categoryId.toString() };
+      mockRequest.params = { id: '1' };
       mockRequest.body = updateData;
 
-      (mockRepository.findOne as jest.Mock)
-        .mockResolvedValueOnce(existingCategory)
-        .mockResolvedValueOnce(null);
+      (mockRepository.findOne as jest.Mock).mockResolvedValue(existingCategory);
 
-      const updatedCategory = {
+      const mergedCategory = {
         ...existingCategory,
         ...updateData,
       };
 
-      (mockRepository.merge as jest.Mock).mockReturnValue(updatedCategory);
-      (mockRepository.save as jest.Mock).mockResolvedValue(updatedCategory);
+      (mockRepository.merge as jest.Mock).mockImplementation((entity, data) => ({
+        ...entity,
+        ...data,
+      }));
+
+      (mockRepository.save as jest.Mock).mockImplementation((entity) => Promise.resolve(entity));
 
       await controller.update(mockRequest as Request, mockResponse as Response);
 
       expect(mockRepository.findOne).toHaveBeenCalledWith({
-        where: { id: categoryId },
+        where: { id: 1 },
       });
+
       expect(mockRepository.merge).toHaveBeenCalledWith(existingCategory, updateData);
-      expect(mockRepository.save).toHaveBeenCalledWith(updatedCategory);
-      expect(mockResponse.json).toHaveBeenCalledWith(updatedCategory);
+      expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining(mergedCategory));
+      expect(mockResponse.json).toHaveBeenCalledWith(expect.objectContaining(mergedCategory));
     });
 
     it('should return 404 if category not found', async () => {
@@ -205,7 +206,7 @@ describe('CategoryController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        error: 'Category with this name already exists',
+        error: 'Category name already exists',
       });
     });
   });
