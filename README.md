@@ -2,7 +2,6 @@
 
 Um sistema completo de gerenciamento de receitas desenvolvido com Node.js, TypeScript, Vue.js e MySQL. Este aplicativo permite que os usuários criem, gerenciem e organizem suas receitas com categorias.
 
-![Gerenciador de Receitas](https://img.shields.io/badge/Gerenciador-Receitas-blue)
 ![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green)
 ![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
