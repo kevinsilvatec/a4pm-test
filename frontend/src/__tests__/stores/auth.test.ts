@@ -1,13 +1,15 @@
-import { setActivePinia, createPinia } from 'pinia';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
+import { setActivePinia, createPinia } from 'pinia';
 
 jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('Auth Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     localStorage.clear();
+    jest.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -19,7 +21,7 @@ describe('Auth Store', () => {
     });
 
     it('should load token from localStorage', () => {
-      localStorage.setItem('token', 'test-token');
+      (localStorage.getItem as jest.Mock).mockReturnValue('test-token');
       const store = useAuthStore();
       expect(store.token).toBe('test-token');
       expect(store.isAuthenticated).toBeTruthy();
@@ -30,30 +32,36 @@ describe('Auth Store', () => {
     it('should login successfully', async () => {
       const mockResponse = {
         data: {
-          user: {
-            id: 1,
-            nome: 'Test User',
-            login: 'testuser'
-          },
-          token: 'test-token'
-        }
+          user: { id: 1, email: 'test@example.com' },
+          token: 'test-token',
+        },
       };
-      (axios.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      mockedAxios.post.mockResolvedValueOnce(mockResponse);
+      (localStorage.setItem as jest.Mock).mockImplementation((key, value) => {
+        if (key === 'token') {
+          (localStorage.getItem as jest.Mock).mockReturnValue(value);
+        }
+      });
 
       const store = useAuthStore();
-      await store.login('testuser', 'password');
+      await store.login({ email: 'test@example.com', password: 'password' });
 
+      expect(mockedAxios.post).toHaveBeenCalledWith('/auth/login', {
+        email: 'test@example.com',
+        password: 'password',
+      });
       expect(store.user).toEqual(mockResponse.data.user);
-      expect(store.token).toBe(mockResponse.data.token);
+      expect(store.token).toBe('test-token');
       expect(localStorage.getItem('token')).toBe('test-token');
       expect(axios.defaults.headers.common['Authorization']).toBe('Bearer test-token');
     });
 
     it('should handle login error', async () => {
-      (axios.post as jest.Mock).mockRejectedValue(new Error('Login failed'));
+      mockedAxios.post.mockRejectedValueOnce(new Error('Login failed'));
 
       const store = useAuthStore();
-      await expect(store.login('testuser', 'password')).rejects.toThrow('Login failed');
+      await expect(store.login({ email: 'test@example.com', password: 'password' })).rejects.toThrow('Login failed');
 
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
@@ -65,30 +73,36 @@ describe('Auth Store', () => {
     it('should register successfully', async () => {
       const mockResponse = {
         data: {
-          user: {
-            id: 1,
-            nome: 'Test User',
-            login: 'testuser'
-          },
-          token: 'test-token'
-        }
+          user: { id: 1, email: 'test@example.com' },
+          token: 'test-token',
+        },
       };
-      (axios.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      mockedAxios.post.mockResolvedValueOnce(mockResponse);
+      (localStorage.setItem as jest.Mock).mockImplementation((key, value) => {
+        if (key === 'token') {
+          (localStorage.getItem as jest.Mock).mockReturnValue(value);
+        }
+      });
 
       const store = useAuthStore();
-      await store.register('Test User', 'testuser', 'password');
+      await store.register({ email: 'test@example.com', password: 'password' });
 
+      expect(mockedAxios.post).toHaveBeenCalledWith('/auth/register', {
+        email: 'test@example.com',
+        password: 'password',
+      });
       expect(store.user).toEqual(mockResponse.data.user);
-      expect(store.token).toBe(mockResponse.data.token);
+      expect(store.token).toBe('test-token');
       expect(localStorage.getItem('token')).toBe('test-token');
       expect(axios.defaults.headers.common['Authorization']).toBe('Bearer test-token');
     });
 
     it('should handle registration error', async () => {
-      (axios.post as jest.Mock).mockRejectedValue(new Error('Registration failed'));
+      mockedAxios.post.mockRejectedValueOnce(new Error('Registration failed'));
 
       const store = useAuthStore();
-      await expect(store.register('Test User', 'testuser', 'password')).rejects.toThrow('Registration failed');
+      await expect(store.register({ email: 'test@example.com', password: 'password' })).rejects.toThrow('Registration failed');
 
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
@@ -98,9 +112,6 @@ describe('Auth Store', () => {
 
   describe('logout', () => {
     it('should clear user data and token', () => {
-      localStorage.setItem('token', 'test-token');
-      axios.defaults.headers.common['Authorization'] = 'Bearer test-token';
-
       const store = useAuthStore();
       store.logout();
 

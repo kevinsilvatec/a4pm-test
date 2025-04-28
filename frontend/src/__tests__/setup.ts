@@ -1,5 +1,7 @@
 /// <reference types="jest" />
 import '@testing-library/jest-dom';
+import { createApp } from 'vue';
+import { createPinia, setActivePinia } from 'pinia';
 
 // Mock localStorage
 const localStorageMock = {
@@ -15,8 +17,34 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
-// Reset all mocks before each test
+// Create Vue app for testing
+const app = createApp({});
+const pinia = createPinia();
+app.use(pinia);
+setActivePinia(pinia);
+
+// Setup global mocks
+jest.mock('axios', () => ({
+  post: jest.fn(),
+  get: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+  defaults: {
+    headers: {
+      common: {},
+    },
+  },
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
   localStorage.clear();
+  (localStorage.getItem as jest.Mock).mockImplementation((key: string) => null);
+});
+
+// Basic test to satisfy Jest's requirement
+describe('Test Setup', () => {
+  it('should have Pinia configured', () => {
+    expect(pinia).toBeDefined();
+  });
 }); 

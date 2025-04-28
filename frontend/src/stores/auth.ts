@@ -3,8 +3,7 @@ import axios from 'axios';
 
 interface User {
   id: number;
-  nome: string;
-  login: string;
+  email: string;
 }
 
 interface AuthState {
@@ -15,44 +14,46 @@ interface AuthState {
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
-    token: localStorage.getItem('token')
+    token: localStorage.getItem('token'),
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token
+    isAuthenticated: (state) => !!state.token,
   },
 
   actions: {
-    async login(login: string, senha: string) {
+    async login(credentials: { email: string; password: string }) {
       try {
-        const response = await axios.post('/api/users/login', { login, senha });
+        const response = await axios.post('/auth/login', credentials);
         const { user, token } = response.data;
-
+        
         this.user = user;
         this.token = token;
         localStorage.setItem('token', token);
-
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } catch (error) {
+        this.user = null;
+        this.token = null;
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['Authorization'];
         throw error;
       }
     },
 
-    async register(nome: string, login: string, senha: string) {
+    async register(credentials: { email: string; password: string }) {
       try {
-        const response = await axios.post('/api/users/register', {
-          nome,
-          login,
-          senha
-        });
+        const response = await axios.post('/auth/register', credentials);
         const { user, token } = response.data;
-
+        
         this.user = user;
         this.token = token;
         localStorage.setItem('token', token);
-
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } catch (error) {
+        this.user = null;
+        this.token = null;
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['Authorization'];
         throw error;
       }
     },
@@ -62,6 +63,6 @@ export const useAuthStore = defineStore('auth', {
       this.token = null;
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
-    }
-  }
+    },
+  },
 }); 
