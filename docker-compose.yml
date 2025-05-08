@@ -1,6 +1,5 @@
 version: '3.8'
 
-
 services:
   backend:
     build:
@@ -12,14 +11,15 @@ services:
       - NODE_ENV=development
       - DB_HOST=db
       - DB_PORT=3306
-      - DB_USER=user
-      - DB_PASSWORD=password
+      - DB_USER=root
+      - DB_PASSWORD=root
       - DB_NAME=db_receitas
     depends_on:
       - db
     volumes:
       - /app/node_modules
     command: sh -c "npm run build && npm start"
+
   db:
     image: mysql:8.0
     ports:

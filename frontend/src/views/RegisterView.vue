@@ -88,7 +88,11 @@ const handleSubmit = async () => {
   error.value = '';
 
   try {
-    await authStore.register(form.nome, form.login, form.senha);
+    await authStore.register({
+      nome: form.nome,
+      login: form.login,
+      senha: form.senha
+    });
     router.push('/recipes');
   } catch (e: any) {
     error.value = e.response?.data?.error || 'Falha ao criar conta';

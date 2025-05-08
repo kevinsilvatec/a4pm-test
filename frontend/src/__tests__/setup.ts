@@ -36,6 +36,20 @@ jest.mock('axios', () => ({
   },
 }));
 
+// Mock api module
+jest.mock('@/services/api', () => ({
+  default: {
+    post: jest.fn(),
+    get: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() }
+    }
+  }
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
   localStorage.clear();

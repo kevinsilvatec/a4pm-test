@@ -4,7 +4,10 @@ module.exports = {
   moduleFileExtensions: ['js', 'jsx', 'json', 'vue', 'ts', 'tsx'],
   transform: {
     '^.+\\.vue$': '@vue/vue3-jest',
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+      babelConfig: true
+    }],
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -20,4 +23,10 @@ module.exports = {
     '!src/router/index.ts',
     '!src/**/*.d.ts',
   ],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+      babelConfig: true
+    }
+  }
 }; 

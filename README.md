@@ -28,7 +28,7 @@ git clone https://github.com/kevinsilvatec/a4pm-test
 cd a4pm-test
 ```
 
-2. Inicie a aplicação usando Docker Compose:
+2.1. Inicie a aplicação usando Docker Compose:
 ```bash
 docker-compose up -d
 ```
@@ -36,7 +36,16 @@ docker-compose up -d
 Isso iniciará:
 - Banco de dados MySQL (porta 3306)
 - API Backend (porta 3000)
-- Aplicação Frontend (porta 5173)
+
+2.2. Inicie a aplicação usando Docker Compose:
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Isso iniciará:
+- Frontend (porta 5173)
 
 3. Acesse a aplicação:
 - Frontend: http://localhost:5173
@@ -71,8 +80,8 @@ npm install
 NODE_ENV=development
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=user
-DB_PASSWORD=password
+DB_USER=root
+DB_PASSWORD=root
 DB_NAME=db_receitas
 JWT_SECRET=your_jwt_secret
 ```

@@ -1,8 +1,23 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useCategoryStore } from '@/stores/category';
-import axios from 'axios';
+import api from '@/services/api';
 
-jest.mock('axios');
+// Mock do api com os métodos necessários
+jest.mock('@/services/api', () => ({
+  __esModule: true,
+  default: {
+    post: jest.fn(),
+    get: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() }
+    }
+  }
+}));
+
+const mockedApi = api as jest.Mocked<typeof api>;
 
 describe('Category Store', () => {
   beforeEach(() => {
@@ -25,7 +40,7 @@ describe('Category Store', () => {
         { id: 1, nome: 'Category 1' },
         { id: 2, nome: 'Category 2' },
       ];
-      (axios.get as jest.Mock).mockResolvedValue({ data: mockCategories });
+      mockedApi.get.mockResolvedValueOnce({ data: mockCategories });
 
       const store = useCategoryStore();
       await store.fetchCategories();
@@ -36,7 +51,7 @@ describe('Category Store', () => {
     });
 
     it('should handle fetch error', async () => {
-      (axios.get as jest.Mock).mockRejectedValue(new Error('Fetch failed'));
+      mockedApi.get.mockRejectedValueOnce(new Error('Fetch failed'));
 
       const store = useCategoryStore();
       await expect(store.fetchCategories()).rejects.toThrow('Fetch failed');
@@ -50,7 +65,7 @@ describe('Category Store', () => {
   describe('createCategory', () => {
     it('should create category successfully', async () => {
       const newCategory = { id: 1, nome: 'New Category' };
-      (axios.post as jest.Mock).mockResolvedValue({ data: newCategory });
+      mockedApi.post.mockResolvedValueOnce({ data: newCategory });
 
       const store = useCategoryStore();
       const result = await store.createCategory('New Category');
@@ -62,7 +77,7 @@ describe('Category Store', () => {
     });
 
     it('should handle create error', async () => {
-      (axios.post as jest.Mock).mockRejectedValue(new Error('Create failed'));
+      mockedApi.post.mockRejectedValueOnce(new Error('Create failed'));
 
       const store = useCategoryStore();
       await expect(store.createCategory('New Category')).rejects.toThrow('Create failed');
@@ -75,7 +90,7 @@ describe('Category Store', () => {
   describe('updateCategory', () => {
     it('should update category successfully', async () => {
       const updatedCategory = { id: 1, nome: 'Updated Category' };
-      (axios.put as jest.Mock).mockResolvedValue({ data: updatedCategory });
+      mockedApi.put.mockResolvedValueOnce({ data: updatedCategory });
 
       const store = useCategoryStore();
       store.categories = [{ id: 1, nome: 'Old Category' }];
@@ -88,7 +103,7 @@ describe('Category Store', () => {
     });
 
     it('should handle update error', async () => {
-      (axios.put as jest.Mock).mockRejectedValue(new Error('Update failed'));
+      mockedApi.put.mockRejectedValueOnce(new Error('Update failed'));
 
       const store = useCategoryStore();
       await expect(store.updateCategory(1, 'Updated Category')).rejects.toThrow('Update failed');
@@ -100,7 +115,7 @@ describe('Category Store', () => {
 
   describe('deleteCategory', () => {
     it('should delete category successfully', async () => {
-      (axios.delete as jest.Mock).mockResolvedValue({});
+      mockedApi.delete.mockResolvedValueOnce({});
 
       const store = useCategoryStore();
       store.categories = [{ id: 1, nome: 'Category to delete' }];
@@ -112,7 +127,7 @@ describe('Category Store', () => {
     });
 
     it('should handle delete error', async () => {
-      (axios.delete as jest.Mock).mockRejectedValue(new Error('Delete failed'));
+      mockedApi.delete.mockRejectedValueOnce(new Error('Delete failed'));
 
       const store = useCategoryStore();
       store.categories = [{ id: 1, nome: 'Category to delete' }];

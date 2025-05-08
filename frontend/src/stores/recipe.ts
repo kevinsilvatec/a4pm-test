@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface Recipe {
   id: number;
@@ -38,7 +38,7 @@ export const useRecipeStore = defineStore('recipe', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('/api/recipes');
+        const response = await api.get('/api/recipes');
         this.recipes = response.data;
       } catch (error) {
         this.error = 'Failed to fetch recipes';
@@ -52,7 +52,7 @@ export const useRecipeStore = defineStore('recipe', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get(`/api/recipes/${id}`);
+        const response = await api.get(`/api/recipes/${id}`);
         this.currentRecipe = response.data;
       } catch (error) {
         this.error = 'Failed to fetch recipe';
@@ -66,7 +66,7 @@ export const useRecipeStore = defineStore('recipe', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.post('/api/recipes', recipe);
+        const response = await api.post('/api/recipes', recipe);
         this.recipes.push(response.data);
         return response.data;
       } catch (error) {
@@ -81,7 +81,7 @@ export const useRecipeStore = defineStore('recipe', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.put(`/api/recipes/${id}`, recipe);
+        const response = await api.put(`/api/recipes/${id}`, recipe);
         const index = this.recipes.findIndex(r => r.id === id);
         if (index !== -1) {
           this.recipes[index] = response.data;
@@ -102,7 +102,7 @@ export const useRecipeStore = defineStore('recipe', {
       this.loading = true;
       this.error = null;
       try {
-        await axios.delete(`/api/recipes/${id}`);
+        await api.delete(`/api/recipes/${id}`);
         this.recipes = this.recipes.filter(r => r.id !== id);
         if (this.currentRecipe?.id === id) {
           this.currentRecipe = null;

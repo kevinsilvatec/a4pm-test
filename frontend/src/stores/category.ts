@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface Category {
   id: number;
@@ -24,7 +24,7 @@ export const useCategoryStore = defineStore('category', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get('/api/categories');
+        const response = await api.get('/api/categories');
         this.categories = response.data;
       } catch (error) {
         this.error = 'Failed to fetch categories';
@@ -38,7 +38,7 @@ export const useCategoryStore = defineStore('category', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.post('/api/categories', { nome });
+        const response = await api.post('/api/categories', { nome });
         this.categories.push(response.data);
         return response.data;
       } catch (error) {
@@ -53,7 +53,7 @@ export const useCategoryStore = defineStore('category', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.put(`/api/categories/${id}`, { nome });
+        const response = await api.put(`/api/categories/${id}`, { nome });
         const index = this.categories.findIndex(c => c.id === id);
         if (index !== -1) {
           this.categories[index] = response.data;
@@ -71,7 +71,7 @@ export const useCategoryStore = defineStore('category', {
       this.loading = true;
       this.error = null;
       try {
-        await axios.delete(`/api/categories/${id}`);
+        await api.delete(`/api/categories/${id}`);
         this.categories = this.categories.filter(c => c.id !== id);
       } catch (error) {
         this.error = 'Failed to delete category';

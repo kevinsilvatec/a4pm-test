@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/services/api';
 
 interface User {
   id: number;
-  email: string;
+  nome: string;
+  login: string;
 }
 
 interface AuthState {
@@ -22,38 +23,34 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    async login(credentials: { email: string; password: string }) {
+    async login(credentials: { login: string; senha: string }) {
       try {
-        const response = await axios.post('/auth/login', credentials);
+        const response = await api.post('/api/users/login', credentials);
         const { user, token } = response.data;
         
         this.user = user;
         this.token = token;
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } catch (error) {
         this.user = null;
         this.token = null;
         localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
         throw error;
       }
     },
 
-    async register(credentials: { email: string; password: string }) {
+    async register(credentials: { nome: string; login: string; senha: string }) {
       try {
-        const response = await axios.post('/auth/register', credentials);
+        const response = await api.post('/api/users/register', credentials);
         const { user, token } = response.data;
         
         this.user = user;
         this.token = token;
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } catch (error) {
         this.user = null;
         this.token = null;
         localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
         throw error;
       }
     },
@@ -62,7 +59,6 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.token = null;
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
     },
   },
 }); 
